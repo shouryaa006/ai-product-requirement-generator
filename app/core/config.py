@@ -21,6 +21,8 @@ class Settings(BaseModel):
     port: int = Field(default=8000)
     gemini_api_key: str = Field(default="")
     gemini_model: str = Field(default="gemini-2.5-flash")
+    rag_top_k: int = Field(default=5)
+    rag_persist_directory: str = Field(default="data/chroma")
 
     model_config = {"extra": "ignore"}
 
@@ -29,6 +31,7 @@ def get_settings() -> Settings:
     """Build settings from environment variables with safe defaults."""
     debug_raw = os.getenv("DEBUG", "false").strip().lower()
     port_raw = os.getenv("PORT", "8000").strip()
+    rag_top_k_raw = os.getenv("RAG_TOP_K", "5").strip()
 
     return Settings(
         app_name=os.getenv("APP_NAME", "AI Product Requirement Generator"),
@@ -37,6 +40,8 @@ def get_settings() -> Settings:
         port=int(port_raw) if port_raw.isdigit() else 8000,
         gemini_api_key=os.getenv("GEMINI_API_KEY", "").strip(),
         gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash").strip() or "gemini-2.5-flash",
+        rag_top_k=int(rag_top_k_raw) if rag_top_k_raw.isdigit() else 5,
+        rag_persist_directory=os.getenv("RAG_PERSIST_DIRECTORY", "data/chroma").strip(),
     )
 
 

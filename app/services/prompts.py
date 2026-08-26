@@ -51,9 +51,27 @@ Quality bar:
 """.strip()
 
 
-def build_user_prompt(product_idea: str) -> str:
-    return (
-        "Create a structured PRD JSON object for this product idea:\n\n"
-        f"{product_idea}\n\n"
-        "Follow the schema and rules from the system message exactly."
-    )
+def build_user_prompt(product_idea: str, retrieved_context: str = "") -> str:
+    if not retrieved_context:
+        return (
+            "Create a structured PRD JSON object for this product idea:\n\n"
+            f"{product_idea}\n\n"
+            "Follow the schema and rules from the system message exactly."
+        )
+
+    return f"""Create a structured PRD JSON object for this product idea.
+
+PRODUCT IDEA:
+{product_idea}
+
+RETRIEVED PRODUCT KNOWLEDGE:
+{retrieved_context}
+
+INSTRUCTIONS:
+- Use the retrieved knowledge when it is relevant.
+- Do not blindly copy the retrieved text.
+- Adapt the guidance to the user's product idea.
+- Do not invent facts that contradict the retrieved knowledge.
+- If retrieved knowledge is not relevant, rely on the product idea.
+- Generate the existing structured PRD.
+- Return output that satisfies the existing Pydantic schema and system rules exactly."""

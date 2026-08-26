@@ -66,12 +66,77 @@ class GeminiLLMService:
                 status_code=503,
             )
 
+        # 1. RAG Retrieval Step (Step 8)
+        retrieved_context = ""
+        try:
+            from app.rag.retriever import get_retrieval_service
+            from app.rag.vector_store import VectorStoreError
+            from app.rag.embeddings import EmbeddingServiceError
+            from app.rag.retriever import RetrievalServiceError
+            
+            retriever = get_retrieval_service()
+            
+            # Verify database count to handle empty knowledge base or unavailable DB (Step 13)
+            try:
+                count = retriever.vector_store.count()
+                if count == 0:
+                    raise LLMServiceError(
+                        "The product knowledge base is empty. Please run ingestion first.",
+                        status_code=503,
+                    )
+            except Exception as e:
+                if isinstance(e, LLMServiceError):
+                    raise
+                raise LLMServiceError(
+                    f"Vector database is unavailable or not initialized: {e}",
+                    status_code=503,
+                ) from None
+
+            # Retrieve relevant chunks
+            results = retriever.retrieve_relevant_knowledge(product_idea)
+            
+            # Log/display RAG debug information (Step 15)
+            print(f"\n--- RAG DEBUG INFORMATION ---")
+            print(f"Query: '{product_idea}'")
+            print(f"Retrieved: {len(results)} chunks")
+            for idx, res in enumerate(results):
+                src = res.get("metadata", {}).get("source", "unknown")
+                dist = res.get("distance")
+                print(f"  Chunk {idx + 1}: Source File: '{src}', Distance Score: {dist}")
+            print(f"-----------------------------\n")
+
+            if results:
+                # Format retrieved context for grounded prompt
+                context_parts = []
+                for res in results:
+                    src_title = res.get("metadata", {}).get("title", "Reference Document")
+                    src_file = res.get("metadata", {}).get("source", "unknown")
+                    context_parts.append(
+                        f"From Document '{src_title}' (Source: {src_file}):\n{res['text']}"
+                    )
+                retrieved_context = "\n\n---\n\n".join(context_parts)
+                
+        except LLMServiceError:
+            raise
+        except (VectorStoreError, EmbeddingServiceError, RetrievalServiceError) as exc:
+            print(f"RAG components raised a known error: {exc}")
+            raise LLMServiceError(
+                f"RAG system failed: {exc}",
+                status_code=502,
+            ) from None
+        except Exception as exc:
+            print(f"Unexpected RAG Retrieval failure: {exc}")
+            raise LLMServiceError(
+                "Failed to retrieve relevant product knowledge for RAG.",
+                status_code=502,
+            ) from None
+
         client = genai.Client(api_key=settings.gemini_api_key)
 
         try:
             response = client.models.generate_content(
                 model=settings.gemini_model,
-                contents=build_user_prompt(product_idea),
+                contents=build_user_prompt(product_idea, retrieved_context),
                 config=types.GenerateContentConfig(
                     system_instruction=SYSTEM_PROMPT,
                     temperature=0.3,
