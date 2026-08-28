@@ -1,27 +1,27 @@
 """Shared typed state definition for the LangGraph workflow."""
 
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import List, Optional, TypedDict
 
 from app.schemas.prd import PRDDocument
 
 
 class AgentState(TypedDict):
-    """The shared state passed deterministically between LangGraph agent nodes."""
+    """Shared state passed between all LangGraph agent nodes."""
 
-    # Input product idea
+    # Original user input
     product_idea: str
 
-    # Context retrieved from local knowledge base
+    # Knowledge retrieved from the RAG system
     retrieved_context: str
 
-    # Agent outputs
+    # Intermediate agent outputs
     planner_output: str
     business_analyst_output: str
     product_manager_output: str
 
-    # Final validated PRD Document
+    # Final validated PRD
     final_prd: Optional[PRDDocument]
 
-    # Error logging and agent execution status/messages
+    # Workflow diagnostics
     errors: List[str]
     logs: List[str]
