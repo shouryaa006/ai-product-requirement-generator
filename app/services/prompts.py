@@ -12,42 +12,86 @@ Rules:
 - Do not write Markdown, headings, or bullet-prefix characters like "- " or "* ".
 - Return ONLY a JSON object. No extra text before or after the JSON.
 - Every field listed below is required. Do not omit fields.
-- Lists must contain at least two items unless the idea is extremely narrow.
+- Lists must contain at least one item.
 - Write in professional English.
+- All string values must contain meaningful non-empty content.
 
-JSON schema (use these exact keys):
+Return this exact JSON structure:
+
 {
-  "product_overview": "string — 1 to 3 paragraphs describing the product",
-  "problem_statement": "string — the core user/business problem",
-  "target_users": ["string", "string"],
+  "product_overview": "1 to 3 paragraphs describing the product",
+  "problem_statement": "The core user/business problem",
+  "target_users": [
+    "Target user description"
+  ],
   "personas": [
     {
-      "name": "string",
-      "role": "string",
-      "goals": ["string"],
-      "pain_points": ["string"]
+      "name": "Persona name",
+      "role": "Persona role",
+      "goals": [
+        "Persona goal"
+      ],
+      "pain_points": [
+        "Persona pain point"
+      ]
     }
   ],
-  "business_objectives": ["string"],
+  "business_objectives": [
+    "Business objective"
+  ],
   "user_stories": [
     {
-      "as_a": "string",
-      "i_want": "string",
-      "so_that": "string"
+      "id": "US-001",
+      "as_a": "type of user",
+      "i_want": "desired capability",
+      "so_that": "desired benefit"
     }
   ],
-  "functional_requirements": ["string — what the system must do"],
-  "non_functional_requirements": ["string — quality attributes such as performance, security, accessibility"],
-  "risks": ["string"],
-  "assumptions": ["string"],
-  "future_enhancements": ["string — out of scope for v1 but plausible later"]
+  "functional_requirements": [
+    {
+      "id": "FR-001",
+      "description": "What the system must do",
+      "priority": "High"
+    }
+  ],
+  "non_functional_requirements": [
+    {
+      "id": "NFR-001",
+      "description": "Quality attribute or constraint",
+      "category": "Performance"
+    }
+  ],
+  "risks": [
+    "Potential project risk"
+  ],
+  "assumptions": [
+    "Project assumption"
+  ],
+  "future_enhancements": [
+    "Plausible enhancement outside version 1"
+  ]
 }
 
-Quality bar:
-- Personas should feel like real people (distinct roles, goals, and pain points).
-- User stories should be testable and tied to the idea.
-- Functional requirements should be implementation-ready, not slogans.
-- Call out risks and assumptions honestly instead of being overly optimistic.
+ID RULES:
+- Every user story MUST have an ID in the exact format US-001, US-002, US-003, etc.
+- Every functional requirement MUST have an ID in the exact format FR-001, FR-002, FR-003, etc.
+- Every non-functional requirement MUST have an ID in the exact format NFR-001, NFR-002, NFR-003, etc.
+- IDs must start at 001.
+- IDs must be sequential with no gaps.
+- IDs must be unique within their respective sections.
+- Do not reuse IDs.
+- Do not use any other ID format.
+
+QUALITY RULES:
+- Personas should feel like real users with distinct roles, goals, and pain points.
+- User stories should be specific, realistic, and testable.
+- Functional requirements should describe concrete system behavior, not vague slogans.
+- Priorities should clearly communicate implementation importance.
+- Non-functional requirements should describe measurable or meaningful quality attributes.
+- Risks and assumptions should be realistic.
+- Future enhancements should be outside the initial version scope.
+
+Return valid JSON only.
 """.strip()
 
 
@@ -56,7 +100,8 @@ def build_user_prompt(product_idea: str, retrieved_context: str = "") -> str:
         return (
             "Create a structured PRD JSON object for this product idea:\n\n"
             f"{product_idea}\n\n"
-            "Follow the schema and rules from the system message exactly."
+            "Follow the exact JSON structure, ID rules, and quality rules "
+            "from the system message."
         )
 
     return f"""Create a structured PRD JSON object for this product idea.
@@ -73,5 +118,9 @@ INSTRUCTIONS:
 - Adapt the guidance to the user's product idea.
 - Do not invent facts that contradict the retrieved knowledge.
 - If retrieved knowledge is not relevant, rely on the product idea.
-- Generate the existing structured PRD.
-- Return output that satisfies the existing Pydantic schema and system rules exactly."""
+- Follow the exact structured PRD JSON schema from the system message.
+- Generate valid US-###, FR-###, and NFR-### IDs.
+- Keep each ID sequential and unique within its section.
+- Return output that satisfies the Pydantic PRDDocument schema exactly.
+- Return JSON only, with no Markdown or extra text.
+"""
