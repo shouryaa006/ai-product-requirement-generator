@@ -12,16 +12,31 @@ SAMPLE_PRD = {
             "pain_points": ["Campus tutoring slots fill up too fast"],
         }
     ],
-    "business_objectives": ["Help 1,000 students book a first session in the first term"],
+    "business_objectives": [
+        "Help 1,000 students book a first session in the first term"
+    ],
     "user_stories": [
         {
+            "id": "US-001",
             "as_a": "student",
             "i_want": "to search tutors by subject",
             "so_that": "I can book help before my exam",
         }
     ],
-    "functional_requirements": ["Users can search tutors by subject and availability"],
-    "non_functional_requirements": ["Search results should load in under 2 seconds"],
+    "functional_requirements": [
+        {
+            "id": "FR-001",
+            "description": "Users can search tutors by subject and availability",
+            "priority": "high",
+        }
+    ],
+    "non_functional_requirements": [
+        {
+            "id": "NFR-001",
+            "description": "Search results should load in under 2 seconds",
+            "category": "performance",
+        }
+    ],
     "risks": ["Low tutor supply in niche subjects"],
     "assumptions": ["Students have access to a smartphone or laptop"],
     "future_enhancements": ["In-app video sessions"],
