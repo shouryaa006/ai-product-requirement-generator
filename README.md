@@ -94,3 +94,9 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/api/v1/prd/generate -C
 ```
 
 Empty or missing `product_idea` should return HTTP 422.
+
+
+## Demo Video
+
+[▶ Watch Project Demo]
+https://drive.google.com/file/d/19KPXu9g2lceyK4rW7a3EEtRFpz7PuDAQ/view?usp=sharing
